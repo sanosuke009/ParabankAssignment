@@ -6,6 +6,7 @@ from web.src.test.pageObjects.parabank.accountoverviewpage import accountovervie
 from web.src.test.pageObjects.parabank.homepage import homepage
 from web.src.test.pageObjects.parabank.launchpage import launchpage
 from web.src.test.pageObjects.parabank.opennewaccountpage import opennewaccountpage
+from web.src.test.pageObjects.parabank.paybillpage import paybillpage
 from web.src.test.pageObjects.parabank.registrationpage import registrationpage
 from web.src.test.pageObjects.parabank.transferfundpage import transferfundpage
 from web.src.test.utilities.edittestdatafile import edit_json_file
@@ -94,3 +95,21 @@ def test_transfer_funds(base:baseclass):
     transferfundpageobj = transferfundpage(base)
     assert transferfundpageobj.transferFunds(testdata.get("newaccountnumber"), testdata.get("toaccountnumber"), testdata.get("transferamount")) == True
     
+def test_pay_bills(base:baseclass):
+    testdata = base.tm.gets("Login")
+    launchpageobj = launchpage(base)
+    assert launchpageobj.login(testdata.get("parabankusername"), testdata.get("parabankpassword")) == True
+    homepageobj = homepage(base)
+    assert homepageobj.ishomepagedisplayed() == True
+    homepageobj.navligateToAccountServicesLink("Bill Pay", 'https://parabank.parasoft.com/parabank/billpay.htm')
+    paybillpageobj = paybillpage(base)
+    assert paybillpageobj.payBill(testdata.get("payeename"), 
+                                  testdata.get("address"), 
+                                  testdata.get("city"), 
+                                  testdata.get("state"), 
+                                  testdata.get("zipcode"), 
+                                  testdata.get("phone"), 
+                                  testdata.get("toaccountnumber"), 
+                                  testdata.get("toaccountnumber"), 
+                                  testdata.get("newaccountnumber"), 
+                                  testdata.get("payamount")) == True
