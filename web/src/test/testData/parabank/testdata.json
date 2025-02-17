@@ -14,10 +14,12 @@
         "Password": "test123"
     },
     "Login": {
-        "parabankusername": "sr124127060",
+        "parabankusername": "sr238979728",
         "parabankpassword": "test123",
-        "newaccountnumber": "15897",
+        "toaccountnumber": "25332",
+        "newaccountnumber": "25443",
         "newaccountbalance": "$100.00",
-        "newaccountavailableamount": "$100.00"
+        "newaccountavailableamount": "$100.00",
+        "transferamount": "20"
     }
 }

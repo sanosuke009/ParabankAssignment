@@ -23,23 +23,7 @@ class accountoverviewpage(homepage):
 
 
 
-    # Page object methods/functions
-
-    def navigateToCreateAccountOverviewPageWhileLoggedIn(self):
-        try:
-            self.page.goto(self.pageurl)
-            self.page.wait_for_selector(selector="xpath="+self.xpath_header_accountoverview, state='visible', timeout=explicitwait)
-            if self.page.is_visible(selector="xpath="+self.xpath_header_accountoverview):
-                self.rm.addscreenshot("Account Overview page is displayed.")
-            else:
-                self.rm.addscreenshot("Account Overview page is NOT displayed.")
-                return False
-        except Exception as e:
-            self.rm.addscreenshot("Error occurred while navigating to Account Overview Page.")
-            print(e)
-            return False
-        else:
-            return True        
+    # Page object methods/functions  
 
     def getAccountBalance(self, accountnum:str) -> str:
         try:

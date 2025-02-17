@@ -7,6 +7,7 @@ from web.src.test.pageObjects.parabank.homepage import homepage
 from web.src.test.pageObjects.parabank.launchpage import launchpage
 from web.src.test.pageObjects.parabank.opennewaccountpage import opennewaccountpage
 from web.src.test.pageObjects.parabank.registrationpage import registrationpage
+from web.src.test.pageObjects.parabank.transferfundpage import transferfundpage
 from web.src.test.utilities.edittestdatafile import edit_json_file
 
 
@@ -40,6 +41,8 @@ def test_web_login(base:baseclass):
     launchpageobj = launchpage(base)
     assert launchpageobj.login(testdata.get("parabankusername"), testdata.get("parabankpassword")) == True
     homepageobj = homepage(base)
+    accoountnum = homepageobj.getAccountNumber()
+    edit_json_file(parabanktestdatafilepath, "Login", "toaccountnumber", accoountnum)
     assert homepageobj.ishomepagedisplayed() == True
 
 def test_web_globalnavigationmenu(base:baseclass):
@@ -80,3 +83,14 @@ def test_account_balance_of_new_account(base:baseclass):
     accountoverviewpageobj = accountoverviewpage(base)
     accountbalance = accountoverviewpageobj.getAccountBalance(testdata.get("newaccountnumber"))
     assert accountbalance == testdata.get("newaccountbalance")
+
+def test_transfer_funds(base:baseclass):
+    testdata = base.tm.gets("Login")
+    launchpageobj = launchpage(base)
+    assert launchpageobj.login(testdata.get("parabankusername"), testdata.get("parabankpassword")) == True
+    homepageobj = homepage(base)
+    assert homepageobj.ishomepagedisplayed() == True
+    homepageobj.navligateToAccountServicesLink("Transfer Funds", 'https://parabank.parasoft.com/parabank/transfer.htm')
+    transferfundpageobj = transferfundpage(base)
+    assert transferfundpageobj.transferFunds(testdata.get("newaccountnumber"), testdata.get("toaccountnumber"), testdata.get("transferamount")) == True
+    

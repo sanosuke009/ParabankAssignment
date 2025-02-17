@@ -27,22 +27,6 @@ class opennewaccountpage(homepage):
 
     # Page object methods/functions
 
-    def navigateToCreateNewAccountPageWhileLoggedIn(self):
-        try:
-            self.page.goto(self.pageurl)
-            self.page.wait_for_selector(selector="xpath="+self.xpath_header_accountoverview, state='visible', timeout=explicitwait)
-            if self.page.is_visible(selector="xpath="+self.xpath_header_accountoverview):
-                self.rm.addscreenshot("Create New Account page is displayed.")
-            else:
-                self.rm.addscreenshot("Create New Account page is NOT displayed.")
-                return False
-        except Exception as e:
-            self.rm.addscreenshot("Error occurred while navigating to Create New Account Page.")
-            print(e)
-            return False
-        else:
-            return True        
-
     def createANewAccount(self, accounttype:str) -> str:
         try:
             self.page.wait_for_selector(selector="xpath="+self.xpath_header_opennewaccount, state='visible', timeout=explicitwait)
