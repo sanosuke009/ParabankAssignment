@@ -2,8 +2,10 @@ from web.src.test.baseClass.baseclass import baseclass
 from web.src.test.config.propConfig import *
 import random
 import pytest
+from web.src.test.pageObjects.parabank.accountoverviewpage import accountoverviewpage
 from web.src.test.pageObjects.parabank.homepage import homepage
 from web.src.test.pageObjects.parabank.launchpage import launchpage
+from web.src.test.pageObjects.parabank.opennewaccountpage import opennewaccountpage
 from web.src.test.pageObjects.parabank.registrationpage import registrationpage
 from web.src.test.utilities.edittestdatafile import edit_json_file
 
@@ -63,3 +65,18 @@ def test_create_account(base:baseclass):
     homepageobj = homepage(base)
     assert homepageobj.ishomepagedisplayed() == True
     homepageobj.navligateToAccountServicesLink("Open New Account", 'https://parabank.parasoft.com/parabank/openaccount.htm')
+    opennewaccountpageobj = opennewaccountpage(base)
+    newaccountnumber = opennewaccountpageobj.createANewAccount("SAVINGS")
+    edit_json_file(parabanktestdatafilepath, "Login", "newaccountnumber", newaccountnumber)
+    assert newaccountnumber != None
+
+def test_account_balance_of_new_account(base:baseclass):
+    testdata = base.tm.gets("Login")
+    launchpageobj = launchpage(base)
+    assert launchpageobj.login(testdata.get("parabankusername"), testdata.get("parabankpassword")) == True
+    homepageobj = homepage(base)
+    assert homepageobj.ishomepagedisplayed() == True
+    homepageobj.navligateToAccountServicesLink("Accounts Overview", 'https://parabank.parasoft.com/parabank/overview.htm')
+    accountoverviewpageobj = accountoverviewpage(base)
+    accountbalance = accountoverviewpageobj.getAccountBalance(testdata.get("newaccountnumber"))
+    assert accountbalance == testdata.get("newaccountbalance")
