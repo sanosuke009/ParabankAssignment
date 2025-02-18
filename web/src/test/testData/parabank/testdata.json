@@ -1,6 +1,5 @@
 {
     "parabankurl_local": "https://parabank.parasoft.com/parabank/index.htm",
-    "parabankurl_vm": "https://parabank.parasoft.com/parabank/index.htm",
     "Registration": {
         "FirstName": "Jap",
         "LastName": "Pos",
@@ -14,8 +13,19 @@
         "Password": "test123"
     },
     "Login": {
-        "parabankusername": "sr402671980",
+        "parabankusername": "sr955175137",
         "parabankpassword": "test123",
-        "accountnumber": ""
+        "toaccountnumber": "15453",
+        "newaccountnumber": "15564",
+        "newaccountbalance": "$50.00",
+        "newaccountavailableamount": "$100.00",
+        "transferamount": "2",
+        "payamount": "1",
+        "payeename": "Payee",
+        "address": "sbdhvhf",
+        "city": "dbngdn",
+        "state": "dnzh",
+        "zipcode": "ngfzfgh",
+        "phone": "dngfxdgn"
     }
 }

@@ -1,12 +1,11 @@
 "This module contains the page object class of the home page"
 
 from web.src.test.baseClass.baseclass import baseclass
-from web.src.test.pageObjects.parabank.launchpage import launchpage
-from web.src.test.managers.resultmanager import resultmanager
+from web.src.test.pageObjects.parabank.homepage import homepage
 from playwright.sync_api import Page
 from web.src.test.config.propConfig import explicitwait
 
-class opennewaccountpage(launchpage):
+class opennewaccountpage(homepage):
 
     def __init__(self, base:baseclass):
         self.page = base.page
@@ -14,53 +13,40 @@ class opennewaccountpage(launchpage):
         self.pageurl = self.page.url
 
     # Page object locators
-    xpath_header_accountoverview = "//h1[contains(text(), 'Accounts Overview')]"
+    xpath_header_opennewaccount = "//h1[contains(text(), 'Open New Account')]"
 
-    xpath_header_homeafterregistration = lambda self, username : "//h1[text()='Welcome "+username+"']"
-    xpath_subheader_homeafterregistration = "//p[text()='Your account was created successfully. You are now logged in.']"
-    xpath_navlink = lambda self, title : "//ul[@class='leftmenu']/li/a[text()='"+title+"']"
-    xpath_accountserviceslink = lambda self, title : "//a[text()='"+title+"']"
+    xpath_select_accounttype = "//select[@id='type']"
+    xpath_button_openaccount = "//input[@value='Open New Account']"
+
+    xpath_header_confirmation = "//h1[contains(text(), 'Account Opened!')]"
+    xpath_link_newaccountid = "//a[@id='newAccountId']"
+
 
 
 
 
     # Page object methods/functions
 
-    def navigateToHomePageWhileLoggedIn(self):
+    def createANewAccount(self, accounttype:str) -> str:
         try:
-            self.page.goto(self.pageurl)
-            self.page.wait_for_selector(selector="xpath="+self.xpath_header_accountoverview, state='visible', timeout=explicitwait)
-            if self.page.is_visible(selector="xpath="+self.xpath_header_accountoverview):
-                self.rm.addscreenshot("Home page is displayed.")
+            self.page.wait_for_selector(selector="xpath="+self.xpath_header_opennewaccount, state='visible', timeout=explicitwait)
+            if self.page.is_visible(selector="xpath="+self.xpath_header_opennewaccount):
+                actypedropdown = self.page.locator("xpath="+self.xpath_select_accounttype)
+                actypedropdown.select_option(accounttype)
+                self.rm.addscreenshot("Account type is selected as "+accounttype)
+                self.page.locator("xpath="+self.xpath_button_openaccount).click()
+                self.rm.addscreenshot("Open New Account button is clicked.")
+                self.page.wait_for_selector(selector="xpath="+self.xpath_header_confirmation, state='visible', timeout=explicitwait)
+                if self.page.is_visible(selector="xpath="+self.xpath_header_confirmation):
+                    accnum = self.page.locator("xpath="+self.xpath_link_newaccountid).inner_text()
+                    self.rm.addscreenshot("Confirmarion page is displayed with the new account id generated as "+accnum)
+                    return accnum
             else:
-                self.rm.addscreenshot("Home page is NOT displayed.")
-                return False
+                self.rm.addscreenshot("Create New Account Page is NOT displayed.")
+                return None
         except Exception as e:
-            self.rm.addscreenshot("Error occurred while navigating to Home Page.")
+            self.rm.addscreenshot("Error occurred while creating a new account on Create New Account Page.")
             print(e)
-            return False
-        else:
-            return True        
-
-    def navligateToAccountServicesLink(self, linkname:str, url:str):
-        try:
-            self.page.wait_for_selector(selector="xpath="+self.xpath_accountserviceslink(linkname), state='visible', timeout=explicitwait)
-            if self.page.is_visible(selector="xpath="+self.xpath_accountserviceslink(linkname)):
-                link = self.page.locator("xpath="+self.xpath_accountserviceslink(linkname))
-                link.click()
-                self.page.wait_for_load_state("load")
-                if url in self.page.url:
-                    self.rm.addscreenshot(linkname+" page is displayed.")
-                else:
-                    self.rm.addscreenshot(linkname+" page is NOT displayed.")
-            else:
-                self.rm.addscreenshot("Navigation link of "+linkname+" is NOT displayed.")
-                return False
-        except Exception as e:
-            self.rm.addscreenshot("Error occurred while navigating to "+linkname+" Page.")
-            print(e)
-            return False
-        else:
-            return True
+            return None
         
 

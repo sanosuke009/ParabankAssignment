@@ -20,6 +20,7 @@ class homepage(launchpage):
     xpath_subheader_homeafterregistration = "//p[text()='Your account was created successfully. You are now logged in.']"
     xpath_navlink = lambda self, title : "//ul[@class='leftmenu']/li/a[text()='"+title+"']"
     xpath_accountserviceslink = lambda self, title : "//a[text()='"+title+"']"
+    xpath_link_accountnumber = "//table[@id='accountTable']/descendant::td[1]/a"
 
 
 
@@ -73,6 +74,20 @@ class homepage(launchpage):
             return False
         else:
             return True
+        
+    def getAccountNumber(self) -> str:
+        try:
+            self.page.wait_for_selector(selector="xpath="+self.xpath_header_accountoverview, state='visible', timeout=explicitwait)
+            if self.page.is_visible(selector="xpath="+self.xpath_header_accountoverview):
+                accountnum = self.page.locator("xpath="+self.xpath_link_accountnumber)
+                return accountnum.inner_text()
+            else:
+                self.rm.addscreenshot("Home page is NOT displayed.")
+                return None
+        except Exception as e:
+            self.rm.addscreenshot("Error occurred while getting Account number.")
+            print(e)
+            return None
         
     def navligateToGlobalNavigationLink(self, linkname:str, url:str):
         try:
