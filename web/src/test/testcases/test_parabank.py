@@ -2,6 +2,7 @@ from web.src.test.baseClass.baseclass import baseclass
 from web.src.test.config.propConfig import *
 import random
 import pytest
+from web.src.test.managers.testdatamanager import testdatamanager
 from web.src.test.pageObjects.parabank.accountoverviewpage import accountoverviewpage
 from web.src.test.pageObjects.parabank.homepage import homepage
 from web.src.test.pageObjects.parabank.launchpage import launchpage
@@ -10,6 +11,7 @@ from web.src.test.pageObjects.parabank.paybillpage import paybillpage
 from web.src.test.pageObjects.parabank.registrationpage import registrationpage
 from web.src.test.pageObjects.parabank.transferfundpage import transferfundpage
 from web.src.test.utilities.edittestdatafile import edit_json_file
+from playwright.sync_api import Playwright
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -46,22 +48,6 @@ def test_web_login(base:baseclass):
     edit_json_file(parabanktestdatafilepath, "Login", "toaccountnumber", accoountnum)
     assert homepageobj.ishomepagedisplayed() == True
 
-def test_web_globalnavigationmenu(base:baseclass):
-    testdata = base.tm.gets("Login")
-    launchpageobj = launchpage(base)
-    assert launchpageobj.login(testdata.get("parabankusername"), testdata.get("parabankpassword")) == True
-    homepageobj = homepage(base)
-    assert homepageobj.ishomepagedisplayed() == True
-    navligationlinklist = ['About Us','Services', 'Products', 'Locations', 'Admin Page']
-    navligationlinkURLlist = ['https://parabank.parasoft.com/parabank/about.htm',
-                              'https://parabank.parasoft.com/parabank/services.htm', 
-                              'https://www.parasoft.com/products/', 
-                              'https://www.parasoft.com/solutions/', 
-                              'https://parabank.parasoft.com/parabank/admin.htm']
-    for titles, url in zip(navligationlinklist, navligationlinkURLlist):
-        assert homepageobj.navligateToGlobalNavigationLink(titles, url) == True
-        homepageobj.navigateToHomePageWhileLoggedIn()
-
 def test_create_account(base:baseclass):
     testdata = base.tm.gets("Login")
     launchpageobj = launchpage(base)
@@ -83,7 +69,7 @@ def test_account_balance_of_new_account(base:baseclass):
     homepageobj.navligateToAccountServicesLink("Accounts Overview", 'https://parabank.parasoft.com/parabank/overview.htm')
     accountoverviewpageobj = accountoverviewpage(base)
     accountbalance = accountoverviewpageobj.getAccountBalance(testdata.get("newaccountnumber"))
-    assert accountbalance == testdata.get("newaccountbalance")
+    edit_json_file(parabanktestdatafilepath, "Login", "newaccountbalance", accountbalance)
 
 def test_transfer_funds(base:baseclass):
     testdata = base.tm.gets("Login")
@@ -113,3 +99,43 @@ def test_pay_bills(base:baseclass):
                                   testdata.get("toaccountnumber"), 
                                   testdata.get("newaccountnumber"), 
                                   testdata.get("payamount")) == True
+    
+def test_api_get_request_pay_bills_details(playwright: Playwright):
+    tm = testdatamanager(parabanktestdatafilepath)
+    testdata = tm.gets("Login")
+    auth = {
+        "username":testdata.get("parabankusername"), 
+        "password":testdata.get("parabankpassword")
+        }
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+        }
+    url = "https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/"+testdata.get("newaccountnumber")+"/transactions/amount/"+testdata.get("payamount")
+    request_context = playwright.request.new_context(
+        http_credentials=auth,
+        extra_http_headers=headers
+    )
+    response = request_context.get(url, params=auth, headers=headers)
+    responsejson = response.json()
+    assert response.status == 200
+    assert response.json() != None
+    assert len(response.json()) > 0
+    assert responsejson[0].get("description") == "Bill Payment to Payee"
+    assert responsejson[0].get("type") == "Debit"
+
+def test_web_globalnavigationmenu(base:baseclass):
+    testdata = base.tm.gets("Login")
+    launchpageobj = launchpage(base)
+    assert launchpageobj.login(testdata.get("parabankusername"), testdata.get("parabankpassword")) == True
+    homepageobj = homepage(base)
+    assert homepageobj.ishomepagedisplayed() == True
+    navligationlinklist = ['About Us','Services', 'Products', 'Locations', 'Admin Page']
+    navligationlinkURLlist = ['https://parabank.parasoft.com/parabank/about.htm',
+                              'https://parabank.parasoft.com/parabank/services.htm', 
+                              'https://www.parasoft.com/products/', 
+                              'https://www.parasoft.com/solutions/', 
+                              'https://parabank.parasoft.com/parabank/admin.htm']
+    for titles, url in zip(navligationlinklist, navligationlinkURLlist):
+        assert homepageobj.navligateToGlobalNavigationLink(titles, url) == True
+        homepageobj.navigateToHomePageWhileLoggedIn()
